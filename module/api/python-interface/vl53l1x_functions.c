@@ -20,14 +20,14 @@ VL53L1_Error StartConnection(uint8_t i2c_address, uint8_t bus_number){
     Status = VL53L1_software_reset(dev);
     Status = VL53L1_WaitDeviceBooted(dev);
 
-    //printf("wait device booted: %d\n", Status);
+    printf("wait device booted: %d\n", Status);
     Status = VL53L1_DataInit(dev);
-    //printf("Data init: %d\n", Status);
+    printf("Data init: %d\n", Status);
     Status = VL53L1_StaticInit(dev);
-    //printf("Static init: %d\n", Status);
+    printf("Static init: %d\n", Status);
 
 
-    /*VL53L1_DeviceInfo_t DeviceInfo;
+    VL53L1_DeviceInfo_t DeviceInfo;
     Status = VL53L1_GetDeviceInfo(dev, &DeviceInfo);
     if(Status == VL53L1_ERROR_NONE){
         printf("VL53L0X_GetDeviceInfo:\n");
@@ -37,12 +37,12 @@ VL53L1_Error StartConnection(uint8_t i2c_address, uint8_t bus_number){
         printf("ProductRevisionMajor : %d\n", DeviceInfo.ProductRevisionMajor);
         printf("ProductRevisionMinor : %d\n", DeviceInfo.ProductRevisionMinor);
     }
-    */
+    
 
     Status = VL53L1_PerformRefSpadManagement(dev);
-    //printf("perform ref spad management: %d\n", Status);
+    printf("perform ref spad management: %d\n", Status);
     Status = VL53L1_SetXTalkCompensationEnable(dev, 0); // Disable crosstalk compensation (bare sensor)
-    //printf("set X talk compensation enable: %d\n", Status);
+    printf("set X talk compensation enable: %d\n", Status);
 
     device = dev;
 
