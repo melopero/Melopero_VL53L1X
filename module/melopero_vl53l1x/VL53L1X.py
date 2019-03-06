@@ -9,6 +9,24 @@ Created on Wed Jan 23 12:01:42 2019
 from ctypes import CDLL, c_uint8
 import os
 
+# Code to find the c library
+#Folder structure :
+#some_folder(usr/local/lib/python3.*/):
+#   melopero_vl53l1x
+#       -VL53L1X.py
+#   vl53l1x_api.*.so
+lib_loc = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+lib_file = ''
+for file in os.listdir(lib_loc):
+    if file.startswith('vl53l1x_api') and file.endswith('.so'):
+        lib_file = file
+
+vl53l1x_api = None
+
+try:
+    vl53l1x_api = CDLL(os.path.join(lib_loc, lib_file))
+except:
+    print('Something went wrong while loading the vl53l1x api, make sure there is a file named vl53l1x_api.*.so in this directory ', lib_loc)
 
 class VL53L1X():
     
@@ -17,7 +35,7 @@ class VL53L1X():
     LONG_DST_MODE = 3
     
     def __init__(self, i2c_addr = 0x29, i2c_bus = 1):
-        self._cfuncs = CDLL(os.path.join(os.getcwd(),'libvl53l1_api.so'))
+        self._cfuncs = vl53l1x_api
         self._i2c_address = i2c_addr
         self._i2c_bus = i2c_bus
         self._cfuncs.StartConnection(c_uint8(self._i2c_address), c_uint8(self._i2c_bus))
