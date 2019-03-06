@@ -43,6 +43,8 @@ sensor.close_connection()
 
 ## Example
 The following example will print out the measured distance a 100 times
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Created on Tue Feb 12 18:23:18 2019
 
