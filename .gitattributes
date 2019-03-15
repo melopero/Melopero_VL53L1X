@@ -1,3 +1,3 @@
 api/core/* linguist-vendored
 api/platform/* linguist-vendored
-api/python_interface/* linguist-vendored
+api/python-interface/* linguist-vendored
