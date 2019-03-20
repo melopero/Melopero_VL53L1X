@@ -7,7 +7,7 @@ Created on Fri Mar 15 08:43:19 2019
 """
 
 import pygame
-import melopero_vl53l1x.VL53L1X as mp
+import melopero_vl53l1x as mp
 
 
 def main():
@@ -19,7 +19,7 @@ def main():
     width = 480
     height = 320
     game_screen = pygame.display.set_mode((width, height))
-    pygame.display.set_caption('grid eye')
+    pygame.display.set_caption('distance sensor')
     
 #    initialize the sensor
     sensor = mp.VL53L1X()
