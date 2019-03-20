@@ -1,3 +1,5 @@
-#!/usr/bin/python
+"""
+@author: Leonardo La Rocca
+"""
 
-print "give me a bottle of rum!"
+from melopero_vl53l1x.VL53L1X import VL53L1X
