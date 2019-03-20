@@ -47,7 +47,7 @@ The following example will print out the measured distance a 100 times
 import time
 import melopero_vl53l1x as mp
 
-sensor = VL53L1X()
+sensor = mp.VL53L1X()
 sensor.start_ranging(mp.VL53L1X.MEDIUM_DST_MODE)
 for i in range(100):
     print(sensor.get_measurement())
