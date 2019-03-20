@@ -17,7 +17,7 @@ The module contains a class to easily access the VL53L1X's sensor functions.
 ### Usage
 First you need to import the module in your file: 
 ```python
-import melopero-vl53l1x as mp
+import melopero_vl53l1x as mp
 ```
 Then you can create a simple vl53l1x object and access it's methods, the sensor object will be initialized with the i2c address set to `0x29` and the i2c bus to `1` alias `(dev/i2c-1)` which is the standard i2c bus in a Raspberry pi. 
 ```python 
@@ -43,23 +43,15 @@ sensor.close_connection()
 
 ## Example
 The following example will print out the measured distance a 100 times
-```python
-"""
-Created on Tue Feb 12 18:23:18 2019
-
-@author: Leonardo La Rocca
-MIT license
-"""
-
+```python 
 import time
-import melopero_vl53l1x.VL53L1X as mp
+import melopero_vl53l1x as mp
 
-sensor = mp.VL53L1X()
+sensor = VL53L1X()
 sensor.start_ranging(mp.VL53L1X.MEDIUM_DST_MODE)
 for i in range(100):
     print(sensor.get_measurement())
-    #time.sleep(0.1)
+    time.sleep(0.1)
 
 sensor.stop_ranging()
 sensor.close_connection()
-```
