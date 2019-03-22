@@ -9,7 +9,9 @@ You will need:
 
 ### Installing
 You can install the melopero-vl53l1x module by typing this line in the terminal: 
-`pip3 install melopero-vl53l1x`
+```python
+sudo pip3 install melopero-vl53l1x
+```
 
 ## Module description
 The module contains a class to easily access the VL53L1X's sensor functions.
