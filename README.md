@@ -5,7 +5,7 @@
 ### Prerequisites
 You will need:
 - a python3 version, which you can get here: [download python3](https://www.python.org/downloads/)
-- the VL53L1X sensor: [buy here](https://www.melopero.com/)
+- the VL53L1X sensor: [buy here](https://www.melopero.com/shop/sensori/prossimita/melopero-vl53l1x-time-of-flight-long-distance-ranging-sensor-breakout/)
 
 ### Installing
 You can install the melopero-vl53l1x module by typing this line in the terminal: 
