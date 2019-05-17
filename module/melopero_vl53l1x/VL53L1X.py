@@ -56,8 +56,7 @@ class VL53L1X():
         ''' Sets the inter-measurement period (the delay between two ranging 
         operations) in milliseconds''' 
         status = self._cfuncs.SetInterPeriod(millis)
-        if status != 0:
-            print('something went wrong error : {}'.format(status))
+        self._print_status(status)
             
     def set_measurement_timing_budget(self, millis):
         '''Timing budget is the time required by the sensor to perform one range measurement.
@@ -69,9 +68,25 @@ class VL53L1X():
             time_b = 20
             
         status = self._cfuncs.SetTimingBudget(time_b*1000)
+        self._print_status(status)
+            
+    def setROI(self, top_left_x, top_left_y, bottom_right_x, bottom_right_y):
+        """Sets the region of interest of the sensor. The roi must be a rectangle
+        with side lengths between 4 and 16.
+        Parameters:
+            top_left_x --- the top left x coordinate\n
+            top_left_y --- the top left y coordinate\n
+            bottom_right_x --- the bottom right x coordinate\n
+            bottom_right_y --- the bottom right y coordinate\n"""
+        if bottom_right_x - top_left_x < 3 or top_left_y - bottom_right_y < 3:
+            raise Exception("The region of interest must be at least a 4*4 rectangle")
+        
+        status = self._cfuncs.SetROI(top_left_x, top_left_y, bottom_right_x, bottom_right_y)
+        self._print_status(status)
+    
+    def _print_status(self, status):
         if status != 0:
             print('something went wrong error : {}'.format(status))
-            
     
     def close_connection(self):
         '''Closes the open i2c connection'''
