@@ -14,9 +14,9 @@ VL53L1_Error StartConnection(uint8_t i2c_address, uint8_t bus_number){
     memset(dev, 0, sizeof(VL53L1_Dev_t));
 
     StartI2CConnection(bus_number);
-    
+
     dev->I2cDevAddr = i2c_address;
-    
+
     Status = VL53L1_software_reset(dev);
     Status = VL53L1_WaitDeviceBooted(dev);
 
@@ -37,7 +37,7 @@ VL53L1_Error StartConnection(uint8_t i2c_address, uint8_t bus_number){
         printf("ProductRevisionMajor : %d\n", DeviceInfo.ProductRevisionMajor);
         printf("ProductRevisionMinor : %d\n", DeviceInfo.ProductRevisionMinor);
     }*/
-    
+
 
     Status = VL53L1_PerformRefSpadManagement(dev);
     //printf("perform ref spad management: %d\n", Status);
@@ -71,7 +71,7 @@ VL53L1_Error StartRanging(int mode){
 int32_t getMeasurement(){
     VL53L1_Error Status = VL53L1_ERROR_NONE;
     Status = VL53L1_WaitMeasurementDataReady(device);
-    if (Status == VL53L1_ERROR_NONE){    
+    if (Status == VL53L1_ERROR_NONE){
         Status = VL53L1_GetRangingMeasurementData(device, pRangingMeasurementData);
         //printf("getting Measurement: %d\n", Status);
         last_distance = pRangingMeasurementData->RangeMilliMeter;
@@ -84,7 +84,7 @@ int32_t getMeasurement(){
         printf("data not ready\n");
         printf("cause: %d\n", Status);
     }
-    
+
     return last_distance;
 }
 
@@ -103,6 +103,15 @@ VL53L1_Error SetTimingBudget(int micros){
 
 VL53L1_Error SetInterPeriod(int millis){
 	return VL53L1_SetInterMeasurementPeriodMilliSeconds(device, millis);
+}
+
+VL53L1_Error SetROI(uint8_t top_left_x, uint8_t top_left_y, uint8_t bottom_right_x, uint8_t bottom_right_y){
+    VL53L1_UserRoi_t roiConfig;
+    roiConfig.TopLeftX = top_left_x;
+    roiConfig.TopLeftY = top_left_y;
+    roiConfig.BotRightX = bottom_right_x;
+    roiConfig.BotRightY = bottom_right_y;
+    return VL53L1_SetUserROI(device, &roiConfig);
 }
 
 
