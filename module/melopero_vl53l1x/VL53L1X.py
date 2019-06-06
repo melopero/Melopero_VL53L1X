@@ -53,7 +53,10 @@ class VL53L1X():
         
     def get_measurement(self):
         ''' returns the last recorded measurement, -1 if there isn't one'''
-        return self._cfuncs.getMeasurement()
+        dst = self._cfuncs.getMeasurement()
+        if dst < 0:
+            self._exception_check(dst)
+        return dst
     
     def stop_ranging(self):
         self._cfuncs.StopRanging()

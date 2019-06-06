@@ -22,7 +22,7 @@ extension = setuptools.Extension(
 
 setuptools.setup(
     name="melopero_vl53l1x",
-    version="0.2.0",
+    version="0.2.1",
     description="A module to easily access Melopero's VL53L1X sensor's features",
     url="https://github.com/melopero/Melopero_VL53L1X/tree/master/module",
     author="Melopero",

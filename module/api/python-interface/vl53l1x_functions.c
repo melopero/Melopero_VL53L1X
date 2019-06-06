@@ -91,6 +91,7 @@ int32_t getMeasurement(){
     else{
         printf("data not ready\n");
         printf("cause: %d\n", Status);
+        return (int32_t) Status;
     }
 
     return last_distance;
