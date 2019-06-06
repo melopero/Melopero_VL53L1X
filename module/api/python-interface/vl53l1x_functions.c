@@ -13,18 +13,21 @@ VL53L1_Error StartConnection(uint8_t i2c_address, uint8_t bus_number){
     VL53L1_Dev_t *dev = (VL53L1_Dev_t *)malloc(sizeof(VL53L1_Dev_t));
     memset(dev, 0, sizeof(VL53L1_Dev_t));
 
-    int i2c_error = StartI2CConnection(bus_number);
-    if (i2c_error < 0) return VL53L1_ERROR_CONTROL_INTERFACE;
+    Status = StartI2CConnection(bus_number);
+    if (Status < 0) return Status;
 
     dev->I2cDevAddr = i2c_address;
 
     Status = VL53L1_software_reset(dev);
+    if (Status < 0) return Status;
     Status = VL53L1_WaitDeviceBooted(dev);
-
+    if (Status < 0) return Status;
     //printf("wait device booted: %d\n", Status);
     Status = VL53L1_DataInit(dev);
+    if (Status < 0) return Status;
     //printf("Data init: %d\n", Status);
     Status = VL53L1_StaticInit(dev);
+    if (Status < 0) return Status;
     //printf("Static init: %d\n", Status);
 
 
@@ -41,14 +44,18 @@ VL53L1_Error StartConnection(uint8_t i2c_address, uint8_t bus_number){
 
 
     Status = VL53L1_PerformRefSpadManagement(dev);
+    if (Status < 0) return Status;
     //printf("perform ref spad management: %d\n", Status);
     Status = VL53L1_SetXTalkCompensationEnable(dev, 0); // Disable crosstalk compensation (bare sensor)
+    if (Status < 0) return Status;
     //printf("set X talk compensation enable: %d\n", Status);
 
     device = dev;
 
     Status = VL53L1_SetMeasurementTimingBudgetMicroSeconds(device, 66000);
+    if (Status < 0) return Status;
     Status = VL53L1_SetInterMeasurementPeriodMilliSeconds(device, 70);
+    if (Status < 0) return Status;
 
     return Status;
 }

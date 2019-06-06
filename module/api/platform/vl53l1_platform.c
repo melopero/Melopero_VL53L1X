@@ -79,15 +79,16 @@
 
 static int i2c_file = -1;
 
-int StartI2CConnection(int bus_num){
+VL53L1_Error StartI2CConnection(int bus_num){
     char filename[20];
     snprintf(filename, 19, "/dev/i2c-%d", bus_num);
     i2c_file = open(filename, O_RDWR);
     if (i2c_file < 0) {
         printf("Error occurred while opening file %s! %s\n", filename, strerror(errno));
+        return VL53L1_ERROR_CONTROL_INTERFACE;
         //exit(EXIT_FAILURE);
     }
-    return i2c_file;
+    return VL53L1_ERROR_NONE;
 }
 
 void CloseI2CConnection(){

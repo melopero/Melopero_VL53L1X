@@ -75,7 +75,7 @@ extern "C"
 {
 #endif
 
-void StartI2CConnection(int bus_num);
+VL53L1_Error StartI2CConnection(int bus_num);
 void CloseI2CConnection();
 
 VL53L1_Error VL53L1_CommsInitialise(
