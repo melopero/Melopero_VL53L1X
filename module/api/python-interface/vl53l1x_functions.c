@@ -13,7 +13,8 @@ VL53L1_Error StartConnection(uint8_t i2c_address, uint8_t bus_number){
     VL53L1_Dev_t *dev = (VL53L1_Dev_t *)malloc(sizeof(VL53L1_Dev_t));
     memset(dev, 0, sizeof(VL53L1_Dev_t));
 
-    StartI2CConnection(bus_number);
+    int i2c_error = StartI2CConnection(bus_number);
+    if (i2c_error < 0) return VL53L1_ERROR_CONTROL_INTERFACE;
 
     dev->I2cDevAddr = i2c_address;
 

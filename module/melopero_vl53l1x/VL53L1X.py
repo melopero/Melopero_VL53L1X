@@ -27,6 +27,7 @@ try:
     vl53l1x_api = CDLL(os.path.join(lib_loc, lib_file))
 except:
     print('Something went wrong while loading the vl53l1x api, make sure there is a file named vl53l1x_api.*.so in this directory ', lib_loc)
+    raise Exception("Error while loading library")
 
 class VL53L1X():
     
@@ -34,11 +35,19 @@ class VL53L1X():
     MEDIUM_DST_MODE = 2
     LONG_DST_MODE = 3
     
+    ERROR_NONE = 0
+    ERROR_CONTROL_INTERFACE = -13
+    
     def __init__(self, i2c_addr = 0x29, i2c_bus = 1):
         self._cfuncs = vl53l1x_api
         self._i2c_address = i2c_addr
         self._i2c_bus = i2c_bus
-        self._cfuncs.StartConnection(c_uint8(self._i2c_address), c_uint8(self._i2c_bus))
+        status = self._cfuncs.StartConnection(c_uint8(self._i2c_address), c_uint8(self._i2c_bus))
+        
+        if status == VL53L1X.ERROR_CONTROL_INTERFACE:
+            raise Exception("IO error")
+        if status != VL53L1X.ERROR_NONE:
+            raise Exception("setup exception {}".format(status))
         
     def start_ranging(self, mode=MEDIUM_DST_MODE):
         '''starts ranging: \nSHORT_DST_MODE for short distance mode\n

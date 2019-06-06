@@ -76,18 +76,19 @@
 #ifndef I2C_M_RD
 #include <linux/i2c.h>
 #endif
- 
+
 static int i2c_file = -1;
 
-void StartI2CConnection(int bus_num){
+int StartI2CConnection(int bus_num){
     char filename[20];
     snprintf(filename, 19, "/dev/i2c-%d", bus_num);
     i2c_file = open(filename, O_RDWR);
     if (i2c_file < 0) {
         printf("Error occurred while opening file %s! %s\n", filename, strerror(errno));
-        exit(EXIT_FAILURE);
+        //exit(EXIT_FAILURE);
     }
-} 
+    return i2c_file;
+}
 
 void CloseI2CConnection(){
     close(i2c_file);
@@ -157,7 +158,7 @@ static int i2c_read(uint8_t slave_addr, uint16_t reg, uint8_t *result, uint8_t l
 }
 
 
-VL53L1_Error VL53L1_WriteMulti(VL53L1_DEV Dev, uint16_t index, uint8_t *pdata, uint32_t count) {    
+VL53L1_Error VL53L1_WriteMulti(VL53L1_DEV Dev, uint16_t index, uint8_t *pdata, uint32_t count) {
     return i2c_write(Dev->I2cDevAddr, index, pdata, count);
 }
 
@@ -284,7 +285,3 @@ VL53L1_Error VL53L1_WaitValueMaskEx(
 
     return VL53L1_ERROR_TIME_OUT;
 }
-
-
-
-
