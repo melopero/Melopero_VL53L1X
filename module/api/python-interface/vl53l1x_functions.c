@@ -68,6 +68,7 @@ VL53L1_DISTANCEMODE_LONG    3
 VL53L1_Error StartRanging(int mode){
     VL53L1_Error Status = VL53L1_ERROR_NONE;
     Status = VL53L1_SetDistanceMode(device, mode);
+    if (Status < 0) return Status;
     //printf("setting distance mode %d: %d\n",mode, Status);
     Status = VL53L1_StartMeasurement(device);
     //printf("starting Measurement: %d\n", Status);
@@ -79,20 +80,17 @@ VL53L1_Error StartRanging(int mode){
 int32_t getMeasurement(){
     VL53L1_Error Status = VL53L1_ERROR_NONE;
     Status = VL53L1_WaitMeasurementDataReady(device);
-    if (Status == VL53L1_ERROR_NONE){
-        Status = VL53L1_GetRangingMeasurementData(device, pRangingMeasurementData);
-        //printf("getting Measurement: %d\n", Status);
-        last_distance = pRangingMeasurementData->RangeMilliMeter;
-        //printf("distance: %d\n", last_distance);
-        Status = VL53L1_ClearInterruptAndStartMeasurement(device);
-        //printf("clear interrupt : %d\n", Status);
-    }
+    if (Status < 0) return Status;
 
-    else{
-        printf("data not ready\n");
-        printf("cause: %d\n", Status);
-        return (int32_t) Status;
-    }
+    Status = VL53L1_GetRangingMeasurementData(device, pRangingMeasurementData);
+    if (Status < 0) return Status;
+    //printf("getting Measurement: %d\n", Status);
+    last_distance = pRangingMeasurementData->RangeMilliMeter;
+    if (Status < 0) return Status;
+    //printf("distance: %d\n", last_distance);
+    Status = VL53L1_ClearInterruptAndStartMeasurement(device);
+    if (Status < 0) return Status;
+    //printf("clear interrupt : %d\n", Status);
 
     return last_distance;
 }
@@ -110,8 +108,28 @@ VL53L1_Error SetTimingBudget(int micros){
 	return VL53L1_SetMeasurementTimingBudgetMicroSeconds(device, micros);
 }
 
+int32_t GetTimingBudget() {
+    VL53L1_Error Status;
+    uint32_t timing_budget = 0;
+    Status = VL53L1_GetMeasurementTimingBudgetMicroSeconds(device, &timing_budget);
+    if (Status == VL53L1_ERROR_NONE)
+        return (int32_t) timing_budget;
+
+    return (int32_t) Status;
+}
+
 VL53L1_Error SetInterPeriod(int millis){
 	return VL53L1_SetInterMeasurementPeriodMilliSeconds(device, millis);
+}
+
+int32_t GetInterPeriod(){
+    VL53L1_Error Status;
+    uint32_t inter_period = 0;
+    Status = VL53L1_GetInterMeasurementPeriodMilliSeconds(device, &inter_period);
+    if (Status == VL53L1_ERROR_NONE)
+        return (int32_t) inter_period;
+
+    return (int32_t) Status;
 }
 
 VL53L1_Error SetROI(uint8_t top_left_x, uint8_t top_left_y, uint8_t bottom_right_x, uint8_t bottom_right_y){
