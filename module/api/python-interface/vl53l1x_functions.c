@@ -2,62 +2,59 @@
 #include "vl53l1_platform.h"
 #include "vl53l1_error_strings.h"
 
-static VL53L1_Dev_t *device;
-static int32_t last_distance;
-static VL53L1_RangingMeasurementData_t RangingMeasurementData;
-static VL53L1_RangingMeasurementData_t *pRangingMeasurementData = &RangingMeasurementData;
+static int devices = 0;
 
-VL53L1_Error StartConnection(uint8_t i2c_address, uint8_t bus_number){
+VL53L1_Error StartConnection(void** dev_pointer, uint8_t i2c_address, uint8_t bus_number){
     VL53L1_Error Status = VL53L1_ERROR_NONE;
 
     VL53L1_Dev_t *dev = (VL53L1_Dev_t *)malloc(sizeof(VL53L1_Dev_t));
     memset(dev, 0, sizeof(VL53L1_Dev_t));
 
-    Status = StartI2CConnection(bus_number);
-    if (Status < 0) return Status;
+    if (devices == 0){
+        Status = StartI2CConnection(bus_number);
+        if (Status < 0) return Status;
+    }
+    devices++;
 
     dev->I2cDevAddr = i2c_address;
 
     Status = VL53L1_software_reset(dev);
     if (Status < 0) return Status;
+
     Status = VL53L1_WaitDeviceBooted(dev);
     if (Status < 0) return Status;
-    //printf("wait device booted: %d\n", Status);
+    
     Status = VL53L1_DataInit(dev);
     if (Status < 0) return Status;
-    //printf("Data init: %d\n", Status);
+    
     Status = VL53L1_StaticInit(dev);
     if (Status < 0) return Status;
-    //printf("Static init: %d\n", Status);
 
-
-    /*VL53L1_DeviceInfo_t DeviceInfo;
-    Status = VL53L1_GetDeviceInfo(dev, &DeviceInfo);
-    if(Status == VL53L1_ERROR_NONE){
-        printf("VL53L0X_GetDeviceInfo:\n");
-        printf("Device Name : %s\n", DeviceInfo.Name);
-        printf("Device Type : %s\n", DeviceInfo.Type);
-        printf("Device ID : %s\n", DeviceInfo.ProductId);
-        printf("ProductRevisionMajor : %d\n", DeviceInfo.ProductRevisionMajor);
-        printf("ProductRevisionMinor : %d\n", DeviceInfo.ProductRevisionMinor);
-    }*/
 
 
     Status = VL53L1_PerformRefSpadManagement(dev);
     if (Status < 0) return Status;
-    //printf("perform ref spad management: %d\n", Status);
-    Status = VL53L1_SetXTalkCompensationEnable(dev, 0); // Disable crosstalk compensation (bare sensor)
+   
+    Status = VL53L1_SetXTalkCompensationEnable(dev, 0); 
     if (Status < 0) return Status;
-    //printf("set X talk compensation enable: %d\n", Status);
 
-    device = dev;
+    Status = VL53L1_SetMeasurementTimingBudgetMicroSeconds(dev, 66000);
+    if (Status < 0) return Status;
 
-    Status = VL53L1_SetMeasurementTimingBudgetMicroSeconds(device, 66000);
+    Status = VL53L1_SetInterMeasurementPeriodMilliSeconds(dev, 70);
     if (Status < 0) return Status;
-    Status = VL53L1_SetInterMeasurementPeriodMilliSeconds(device, 70);
-    if (Status < 0) return Status;
+
+    *dev_pointer = dev;
 
     return Status;
+}
+
+VL53L1_Error SetI2CAddress(void* dev_pointer, uint8_t i2c_address){    
+    VL53L1_Dev_t *device = (VL53L1_Dev_t*) dev_pointer;
+    
+    VL53L1_Error status = VL53L1_ERROR_NONE;
+    status = VL53L1_SetDeviceAddress(device, i2c_address);
+    return status;
 }
 
 /*VALID MODES ARE :
@@ -65,50 +62,48 @@ VL53L1_DISTANCEMODE_SHORT   1
 VL53L1_DISTANCEMODE_MEDIUM  2
 VL53L1_DISTANCEMODE_LONG    3
 */
-VL53L1_Error StartRanging(int mode){
+VL53L1_Error StartRanging(void* dev_pointer, int mode){
+    VL53L1_Dev_t *device = (VL53L1_Dev_t*) dev_pointer;
+
     VL53L1_Error Status = VL53L1_ERROR_NONE;
     Status = VL53L1_SetDistanceMode(device, mode);
     if (Status < 0) return Status;
-    //printf("setting distance mode %d: %d\n",mode, Status);
+
     Status = VL53L1_StartMeasurement(device);
-    //printf("starting Measurement: %d\n", Status);
-    last_distance = -1;
     return Status;
 }
 
 /* return distance in millimeter */
-int32_t getMeasurement(){
+int32_t GetMeasurement(void* dev_pointer){
+    VL53L1_Dev_t *device = (VL53L1_Dev_t*) dev_pointer;
+    VL53L1_RangingMeasurementData_t RangingMeasurementData;
+    VL53L1_RangingMeasurementData_t *pRangingMeasurementData = &RangingMeasurementData;
+
     VL53L1_Error Status = VL53L1_ERROR_NONE;
     Status = VL53L1_WaitMeasurementDataReady(device);
     if (Status < 0) return Status;
 
     Status = VL53L1_GetRangingMeasurementData(device, pRangingMeasurementData);
     if (Status < 0) return Status;
-    //printf("getting Measurement: %d\n", Status);
-    last_distance = pRangingMeasurementData->RangeMilliMeter;
-    if (Status < 0) return Status;
-    //printf("distance: %d\n", last_distance);
+    
     Status = VL53L1_ClearInterruptAndStartMeasurement(device);
     if (Status < 0) return Status;
-    //printf("clear interrupt : %d\n", Status);
 
-    return last_distance;
+    return pRangingMeasurementData->RangeMilliMeter;
 }
 
-void StopRanging(){
-    VL53L1_StopMeasurement(device);
+VL53L1_Error StopRanging(void *dev_pointer){
+    VL53L1_Dev_t *device = (VL53L1_Dev_t*) dev_pointer;
+    return VL53L1_StopMeasurement(device);
 }
 
-
-VL53L1_Dev_t* GetDevicePointer(){
-    return device;
-}
-
-VL53L1_Error SetTimingBudget(int micros){
+VL53L1_Error SetTimingBudget(void *dev_pointer, int micros){
+    VL53L1_Dev_t *device = (VL53L1_Dev_t*) dev_pointer;
 	return VL53L1_SetMeasurementTimingBudgetMicroSeconds(device, micros);
 }
 
-int32_t GetTimingBudget() {
+int32_t GetTimingBudget(void *dev_pointer) {
+    VL53L1_Dev_t *device = (VL53L1_Dev_t*) dev_pointer;
     VL53L1_Error Status;
     uint32_t timing_budget = 0;
     Status = VL53L1_GetMeasurementTimingBudgetMicroSeconds(device, &timing_budget);
@@ -118,11 +113,13 @@ int32_t GetTimingBudget() {
     return (int32_t) Status;
 }
 
-VL53L1_Error SetInterPeriod(int millis){
+VL53L1_Error SetInterPeriod(void* dev_pointer, int millis){
+    VL53L1_Dev_t *device = (VL53L1_Dev_t*) dev_pointer;
 	return VL53L1_SetInterMeasurementPeriodMilliSeconds(device, millis);
 }
 
-int32_t GetInterPeriod(){
+int32_t GetInterPeriod(void *dev_pointer){
+    VL53L1_Dev_t *device = (VL53L1_Dev_t*) dev_pointer;
     VL53L1_Error Status;
     uint32_t inter_period = 0;
     Status = VL53L1_GetInterMeasurementPeriodMilliSeconds(device, &inter_period);
@@ -132,7 +129,8 @@ int32_t GetInterPeriod(){
     return (int32_t) Status;
 }
 
-VL53L1_Error SetROI(uint8_t top_left_x, uint8_t top_left_y, uint8_t bottom_right_x, uint8_t bottom_right_y){
+VL53L1_Error SetROI(void* dev_pointer, uint8_t top_left_x, uint8_t top_left_y, uint8_t bottom_right_x, uint8_t bottom_right_y){
+    VL53L1_Dev_t *device = (VL53L1_Dev_t*) dev_pointer;
     VL53L1_UserRoi_t roiConfig;
     roiConfig.TopLeftX = top_left_x;
     roiConfig.TopLeftY = top_left_y;
@@ -141,7 +139,9 @@ VL53L1_Error SetROI(uint8_t top_left_x, uint8_t top_left_y, uint8_t bottom_right
     return VL53L1_SetUserROI(device, &roiConfig);
 }
 
-
-void CloseConnection(){
-    CloseI2CConnection();
+void CloseConnection(void **dev_pointer){
+    devices--;
+    if (devices == 0) CloseI2CConnection();
+    free(*dev_pointer);
+    *dev_pointer = NULL;
 }

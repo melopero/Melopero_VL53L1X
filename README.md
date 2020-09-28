@@ -30,6 +30,8 @@ Alternatively you can modify it's parameters by typing
 sensor = mp.VL53L1X(i2c_addr = myaddress, i2c_bus = mybus)
 ```
 
+**Note: If you are using multiple vl53l1x together they all have to be on the same i2c bus**
+
 The sensor has the following methods
 ```python 
 sensor.start_ranging(range_mode) # Starts ranging, range_mode can be one of SHORT_DST_MODE, MEDIUM_DST_MODE, LONG_DST_MODE 
@@ -38,6 +40,8 @@ sensor.stop_ranging() #stops the continuous ranging
 sensor.set_intermeasurement_period(millis) #sets the milliseconds between measurements
 sensor.set_measurement_timing_budget(millis) #Sets the milliseconds the sensor has to take a measurement, must be between [20ms, 1000ms]
 ```
+
+**Update: It is no longer needed to explicitly close the connection to the device. All resiurces will be freed when the object is out of scope ((or) is deleted).**  
 Remember to close the connection after using the sensor
 ```python 
 sensor.close_connection()
